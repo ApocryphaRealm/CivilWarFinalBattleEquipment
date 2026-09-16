@@ -96,13 +96,55 @@ def vmad_scripts(scripts):
     return out
 
 
-def quest_fragments(filename, fragments):
-    """fragments: [(stage, item_index, script, function)]"""
+def quest_fragments(filename, fragments, aliases=()):
+    """fragments: [(stage, item_index, script, function)]
+       aliases:   [(alias_id, quest_formid, [(script_name, [(prop, formid, alias)])])]
+
+    The alias array is the second half of a quest's VMAD, and it is where an ALIAS script lives.
+    That distinction matters: a script attached to the quest itself never hears OnObjectEquipped,
+    which is the whole reason the set-effects quest exists."""
     out = b"\x02" + struct.pack("<h", len(fragments)) + wstring(filename)
     for stage, item, script, func in fragments:
         out += struct.pack("<HhiB", stage, 0, item, 1) + wstring(script) + wstring(func)
-    out += struct.pack("<h", 0)          # no alias fragments
+    out += struct.pack("<h", len(aliases))
+    for alias_id, quest_form, scripts in aliases:
+        out += struct.pack("<HHI", 0, alias_id, quest_form)      # object format 2
+        out += struct.pack("<hhH", 5, 2, len(scripts))
+        for name, props in scripts:
+            out += wstring(name) + b"\x00" + struct.pack("<H", len(props))
+            for pname, fid, alias in props:
+                out += wstring(pname) + b"\x01\x01"
+                out += struct.pack("<HHI", 0, alias & 0xFFFF, fid)
     return out
+
+
+def build_effects_quest(allot, pieces_flst, abilities_flst):
+    """A quest that exists only to hold a player alias, so an alias script can watch equips.
+
+    It is start-game-enabled and never stops, and nothing about it is visible: no name, no journal
+    entry, no objectives, quest type 0. Hanging behaviour off a player alias is the standard way to
+    do this, and the alternative - an object enchantment on every piece - is exactly what put the
+    effect list on the inventory card and had to be undone."""
+    q = allot("acwfbe", 0x910)
+    body = z_sub(b"EDID", "ACWFBE_SetEffectsQuest")
+    body += sub(b"VMAD", vmad_scripts([]) + quest_fragments("", [], aliases=[
+        (0, q, [("ACWFBE_SetEffects", [
+            ("Pieces", pieces_flst, 0xFFFF),
+            ("Abilities", abilities_flst, 0xFFFF),
+            ("PlayerRef", PLAYER_REF, 0xFFFF),
+        ])]),
+    ]))
+    # flags 0x0001 = start game enabled; priority 0; quest type 0 = none, so it never shows.
+    body += sub(b"DNAM", struct.pack("<HBBII", 0x0001, 0, 0xFF, 0, 0))
+    body += sub(b"NEXT", b"")
+    body += sub(b"ANAM", struct.pack("<I", 1))
+    body += sub(b"ALST", struct.pack("<I", 0))
+    body += z_sub(b"ALID", "Player")
+    body += sub(b"FNAM", struct.pack("<I", 0))
+    body += sub(b"ALFR", struct.pack("<I", PLAYER_REF))
+    body += sub(b"VTCK", struct.pack("<I", 0))
+    body += sub(b"ALED", b"")
+    return record(b"QUST", q, body)
 
 
 def info_fragment(filename, script, func):
@@ -149,9 +191,15 @@ def build(allot, lvli_imperial, lvli_stormcloak):
         (STAGE_STORMCLOAK, 0, "ACWFBE_EquipmentQF", "Fragment_2"),
     ]))
     body += z_sub(b"FULL", "Civil War Final Battle Equipment")
-    # flags 0x0100 = run once; priority 30; quest type 6 = Miscellaneous, so it sits in the
-    # journal's Misc list exactly as Reduced Cut's did.
-    body += sub(b"DNAM", struct.pack("<HBBII", 0x0100, 30, 0xFF, 0, 6))
+    # Priority 30; quest type 6 = Miscellaneous, so it sits in the journal's Misc list.
+    #
+    # NO "run once" flag (0x0100). It was set here at first, copied from the mod this design comes
+    # from, and it is both redundant and harmful: the Story Manager node already refuses to fire
+    # again once the quest has left stage 0, so nothing can re-trigger it anyway - and Run Once
+    # means a quest that gets stopped early can NEVER be restarted, so a player who loses it loses
+    # the equipment for the rest of that playthrough with no way back. Found while testing, where
+    # it also made the quest unrestartable after a single run.
+    body += sub(b"DNAM", struct.pack("<HBBII", 0, 30, 0xFF, 0, 6))
     body += sub(b"NEXT", b"")
 
     body += sub(b"INDX", struct.pack("<HBB", STAGE_OFFERED, 0, 0))

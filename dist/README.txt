@@ -16,18 +16,24 @@ WHAT HAPPENS IN GAME
 
 THE SETS
     ICE VEINS - for the Stormcloaks. Cuirass, helmet, gauntlets, boots, shield and cloak, the
-    Ice Veins Axe, and the greataxe Tsun's Judgement.
+    Ice Veins Axe, and the greataxe Talos' Wrath.
 
     DRAGON BLOOD - for the Legion. Cuirass, helmet, gauntlets, boots, shield and cloak, and the
     sword Dragon's Oath.
 
-    Every piece is enchanted and every enchantment carries its own name, so the magic effects menu
-    reads "Ice Veins Helmet" rather than "Fortify Block" - you can see at a glance what the set is
-    doing for you. Several of the effects have no base-game equivalent: Fortify Power Attacks,
-    Fortify Bash Damage, Resist Arrow Damage, Resist Spell Damage, Fortify Shout Power and Shout
-    Duration. They are defined inside this plugin, so nothing else has to be installed for them to
-    work, and they are balanced to sit alongside a modern enchanting overhaul rather than
-    trivialise one.
+    Look at a piece in your inventory and it tells you what it is - equipment given only to the
+    highest ranks - and nothing more. No effect list, no magnitudes. What it actually does is
+    under Magic, in your active effects, named for the piece it came from: "Ice Veins Helmet",
+    "Dragon Blood Gauntlets". The gear reads as an honour that was granted, and the numbers are
+    there for anyone who goes looking.
+
+    Several of those effects have no base-game equivalent: Fortify Power Attacks, Fortify Bash
+    Damage, Resist Arrow Damage, Resist Spell Damage, Fortify Shout Power and Shout Duration. They
+    are defined inside this plugin, so nothing else has to be installed, and they are balanced to
+    sit alongside a modern enchanting overhaul rather than trivialise one.
+
+    The three weapons do carry ordinary enchantments and show them on the item card, because a
+    weapon enchantment has to be on the weapon to fire when you hit something.
 
 CRAFTING
     There is none, and that is deliberate. These are one-of-a-kind harnesses handed out by the head

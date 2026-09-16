@@ -118,6 +118,7 @@ SHARPENING_WHEEL = 0x00088108
 FORGE = 0x00088105
 
 MAGIC_HAT_MARKER = 0x000435A5   # the vanilla magic-menu display object
+ABILITY_EQUIP_TYPE = 0x00013F44  # the equip type every vanilla Ability uses
 
 # An armour record's model block: male and female world models, male and female first
 # person, each with its texture-set companion.
@@ -160,7 +161,19 @@ EDID_PREFIX = [
 # name of the piece it sits on. The owner keeps the per-piece naming deliberately - "i like how the
 # enchantments have unique names in the magic affects menu" - so the odd one out is brought into
 # line rather than left generic.
-DISPLAY_FIXUPS = {"Frost Damage": "Ice Veins Axe"}
+DISPLAY_FIXUPS = {"Frost Damage": "Ice Veins Axe", "Tsun's Judgement": "Talos' Wrath"}
+
+# The whole of what an item card is allowed to say. Taken from the line My Version puts on its own
+# pieces - "Armor Only Given To The Highest Ranks Of Stormcloaks" - which is what the owner pointed
+# at when he said the card should show only that it is equipment granted to accomplished soldiers.
+SET_DESCRIPTION = {
+    "stormcloak": "Given only to the highest ranks of the Stormcloaks.",
+    "imperial": "Given only to the highest ranks of the Imperial Legion.",
+}
+
+
+def z(text):
+    return text.encode("cp1252") + b"\x00"
 
 _seen_edids = {}
 
@@ -342,8 +355,12 @@ def main(out_path):
         rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
         kywd_bytes += record(b"KYWD", new, remap_body(src, rm, new_id=new))
 
+    # Only the WEAPON enchantments stay enchantments. A weapon's has to be on the weapon to fire on
+    # hit, and seeing it on the item card is normal. The armour's twelve become abilities instead -
+    # see step 3a - because an object enchantment always prints its effects on the inventory card
+    # and no flag prevents it.
     ench_bytes = b""
-    for local in ENCHANTMENTS:
+    for local in sorted(set(WEAPON_ENCHANT.values())):
         src = E[cc_in_ench | local]
         new = allot(CC, local)
         rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
@@ -370,15 +387,32 @@ def main(out_path):
         arma_bytes += record(b"ARMA", new, remap_body(src, rm, new_id=new))
         report_unresolved(src, rm)
 
-    armo_bytes = b""
+    armo_bytes, piece_ids, piece_enchants = b"", [], []
     for local, name in ARMOUR:
         base = E[cc_in_ench | local]          # Redone: stats, keywords, enchantment, name
         mv = I[cc_in_items | local]           # My Version: the meshes and the armatures
         new = allot(CC, local)
+        eitm = base.get(b"EITM")
+        if eitm:
+            piece_ids.append(new)
+            piece_enchants.append(struct.unpack("<I", eitm)[0] & 0xFFFFFF)
         rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
         body = b""
         emitted_modl = False
         for sig, d in base.subs:
+            # The card says WHAT the piece is and WHO it is given to, and nothing else. The owner,
+            # 2026-09-16: "You should only be able to see that it's equipment granted to highly
+            # accomplished storm cloaks ... And you should have to look at the magic effects under
+            # magic to see what each piece of equipment does."
+            if sig == b"DESC":
+                body += sub(b"DESC", z(SET_DESCRIPTION["imperial"
+                                                       if name.startswith("ImperialDragon")
+                                                       else "stormcloak"]))
+                continue
+            # No object enchantment on armour - it would print its effects on the card. The effects
+            # come back as an ability, applied on equip by the set-effects quest.
+            if sig == b"EITM":
+                continue
             # Same Creation Club plumbing the weapons carry: a defaultsetstageonplayeracquireitem
             # script pointed at the creation's duel quest. Nothing here has a duel to advance.
             if sig == b"VMAD":
@@ -412,6 +446,44 @@ def main(out_path):
             body += sub(sig, d)
         armo_bytes += record(b"ARMO", new, body)
         report_unresolved(base, rm)
+
+    # ---- 3a. the armour's effects, as abilities rather than enchantments
+    #
+    # Each piece that had an enchantment gets an ability carrying the same effects at the same
+    # magnitudes and under the same name. The vanilla precedent is exact: TGFullSet and DBFullSet,
+    # the Thieves Guild and Dark Brotherhood armour bonuses, are Abilities built this way.
+    spel_bytes, ability_ids = b"", []
+    for piece_new, ench_local in zip(piece_ids, piece_enchants):
+        src = E[cc_in_ench | ench_local]
+        new = allot("acwfbe-ability", ench_local)
+        rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
+        body = sub(b"EDID", z(rename_names(b"EDID", src.get(b"EDID"), new)[:-1].decode("cp1252")
+                              .replace("Ench", "Ability")))
+        body += sub(b"OBND", b"\x00" * 12)
+        body += sub(b"FULL", rename_names(b"FULL", src.get(b"FULL"), new))
+        body += sub(b"ETYP", struct.pack("<I", ABILITY_EQUIP_TYPE))
+        body += sub(b"DESC", z(""))
+        # cost 0, manual-cost flag, type 4 = Ability, constant effect, self - TGFullSet's own shape.
+        body += sub(b"SPIT", struct.pack("<IIIfIIffI", 0, 1, 4, 0.5, 0, 0, 0.0, 0.0, 0))
+        for sig, d in src.subs:
+            if sig in (b"EFID", b"EFIT", b"CTDA"):
+                if sig == b"EFID":
+                    d = struct.pack("<I", rm(struct.unpack("<I", d)[0]))
+                elif sig == b"CTDA":
+                    d = remap_ctda(d, rm)
+                body += sub(sig, d)
+        spel_bytes += record(b"SPEL", new, body)
+        ability_ids.append(new)
+        report_unresolved(src, rm)
+
+    pieces_flst = allot("acwfbe", 0x920)
+    abilities_flst = allot("acwfbe", 0x921)
+    flst_bytes = record(b"FLST", pieces_flst,
+                        sub(b"EDID", z("ACWFBE_SetPieces")) +
+                        b"".join(sub(b"LNAM", struct.pack("<I", f)) for f in piece_ids))
+    flst_bytes += record(b"FLST", abilities_flst,
+                         sub(b"EDID", z("ACWFBE_SetAbilities")) +
+                         b"".join(sub(b"LNAM", struct.pack("<I", f)) for f in ability_ids))
 
     # ---- 4. the three champion weapons, wearing Redone's enchantments
     #
@@ -507,13 +579,16 @@ def main(out_path):
         report_unresolved(r, rm)
 
     groups = [(b"KYWD", kywd_bytes), (b"MGEF", mgef_bytes), (b"ENCH", ench_bytes),
-              (b"ARMA", arma_bytes), (b"ARMO", armo_bytes), (b"STAT", stat_bytes),
-              (b"WEAP", weap_bytes),
-              (b"LVLI", lvli_bytes), (b"COBJ", cobj_bytes)]
+              (b"SPEL", spel_bytes), (b"ARMA", arma_bytes), (b"ARMO", armo_bytes),
+              (b"STAT", stat_bytes), (b"WEAP", weap_bytes),
+              (b"LVLI", lvli_bytes), (b"COBJ", cobj_bytes), (b"FLST", flst_bytes)]
 
     quest_records, quest_groups = questmod.build(
         allot, table[(CC, LEVELLED[0][0])], table[(CC, LEVELLED[1][0])])
     groups += quest_groups
+    effects_quest = questmod.build_effects_quest(allot, pieces_flst, abilities_flst)
+    groups.append((b"QUST", effects_quest))
+    quest_records += 1
 
     count = len(table)
     blob = tes4(OUT_MASTERS, count, (next_id[0] & 0xFFFFFF), AUTHOR, DESCRIPTION)
@@ -530,6 +605,8 @@ def main(out_path):
     print("  armour pieces ............................ %d  (%d armatures)"
           % (len(ARMOUR), len(arma_needed)))
     print("  weapons .................................. %d" % len(WEAPONS))
+    print("  effects as ABILITIES, not enchantments ... %d  (item cards stay clean)"
+          % len(ability_ids))
     print("  levelled lists ........................... %d" % len(LEVELLED))
     for name, f in lvli_dropped:
         print("      dropped from %s: %s (Creation Club only, nothing to rebuild it from)"
