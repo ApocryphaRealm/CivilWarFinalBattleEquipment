@@ -12,6 +12,11 @@ WHAT HAPPENS IN GAME
     Speak to him where he stands. Ulfric in the Palace of the Kings, Tullius in Castle Dour. He
     hands the set over and you wear it into the last battle.
 
+    IT IS VOICED. Your commander answers out loud, in his own voice - Ulfric's and General
+    Tullius's, from the base game. No silent lines, no subtitle flashing past, and nothing
+    synthesised: the reply is a line that character already speaks in the Civil War, chosen to
+    fit the moment, so it sounds exactly like the rest of the questline.
+
     You get it BEFORE you march. Not at the walls, not off a corpse, and not for winning a duel.
 
 THE SETS
@@ -71,7 +76,6 @@ COMPATIBILITY
 
     The armour is built for the vanilla body and is not BodySlide-refitted.
 
-    The two lines of dialogue are unvoiced and show as subtitles.
 
 CREDIT
     The meshes and textures are NordwarUA's, from his Sons of Skyrim and Legion armour work.
