@@ -73,8 +73,15 @@ def wstring(text):
 
 def ctda(function, param1=0, param2=0, comparison=1.0, operator=0,
          run_on=RUN_ON_SUBJECT, reference=0):
-    return struct.pack("<BBBBfIIIIiI", operator, 0, 0, 0, comparison, function,
-                       param1, param2, run_on, reference, 0xFFFFFFFF)
+    """A condition, ALREADY WRAPPED as a CTDA subrecord.
+
+    It returns the wrapped form on purpose. The first version of this returned the bare 32-byte
+    struct, every call site did `body += ctda(...)`, and the conditions went into the record with
+    no subrecord header at all - which silently truncated every quest record at its first
+    condition. The plugin still loaded, the scripts still attached, and the quest still took a
+    stage; only the objectives, the targets and the aliases quietly did not exist."""
+    return sub(b"CTDA", struct.pack("<BBBBfIIIIiI", operator, 0, 0, 0, comparison, function,
+                                    param1, param2, run_on, reference, 0xFFFFFFFF))
 
 
 def vmad_scripts(scripts):

@@ -32,7 +32,16 @@ a forge recipe. Nothing of anyone else's is stored in this repository - see `.gi
 
 ## Open items
 
-* **NOT SEEN IN GAME.** Everything so far is static: the plugin parses, every reference resolves,
+* **First in-game run, 2026-09-16 - the plugin loads and two bugs were found and fixed.**
+  It loaded at index 147 in Njordlinger, the two Papyrus scripts attached, and `startquest` +
+  `setstage 10` drove the quest to stage 10. The journal objective did not appear, which exposed a
+  real defect: `ctda()` in `quest.py` was returning the bare 32-byte condition struct and every call
+  site concatenated it straight into the record body with no CTDA subrecord header. That truncated
+  every quest record at its first condition - the plugin still loaded, the scripts still attached,
+  the quest still took a stage, and the objectives, targets and aliases silently did not exist.
+  Fixed, and `verify-esp.py` now fails on any malformed subrecord signature, which is what should
+  have caught it before the game ever saw it. Awaiting a relaunch to retest.
+* **NOT YET CONFIRMED IN GAME.** Everything so far is static: the plugin parses, every reference resolves,
   the assets are all present and the seven textures left behind were confirmed vanilla with BSArch.
   What that cannot prove is whether the quest actually fires, whether Ulfric offers the line, and
   whether the armour renders.

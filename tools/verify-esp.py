@@ -97,6 +97,18 @@ def main(path):
 
     problems = []
 
+    # STRUCTURE FIRST. A subrecord signature is always four characters of A-Z or 0-9; anything else
+    # means the body stopped parsing as subrecords somewhere and the rest of the record is being
+    # read as garbage. This check exists because a hand-built condition went in without its
+    # subrecord header and truncated every quest record at its first condition - the plugin loaded,
+    # the scripts attached, the quest took a stage, and the objectives simply were not there.
+    for r in recs[1:]:
+        for sig, d in r.subs:
+            if not (len(sig) == 4 and all(48 <= c <= 57 or 65 <= c <= 90 for c in sig)):
+                problems.append("%s %08X contains a malformed subrecord signature %r - the body "
+                                "stopped parsing cleanly" % (r.type.decode(), r.formid, sig))
+                break
+
     def check(rec, sig, value):
         if value in (0, 0xFFFFFFFF):
             return
