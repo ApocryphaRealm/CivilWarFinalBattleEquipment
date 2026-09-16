@@ -126,7 +126,14 @@ ABILITY_EQUIP_TYPE = 0x00013F44  # the equip type every vanilla Ability uses
 
 # An armour record's model block: male and female world models, male and female first
 # person, each with its texture-set companion.
-MODEL_SUBS = {b"MOD2", b"MO2T", b"MOD3", b"MO3T", b"MOD4", b"MO4T", b"MOD5", b"MO5T"}
+MODEL_SUBS = {b"MOD2", b"MO2T", b"MOD3", b"MO3T", b"MOD4", b"MO4T", b"MOD5", b"MO5T",
+              # BOD2 belongs here too, and learning that cost a bug. The body-slot flags describe
+              # the MESH, not the statistics: Redone kept the Creation Club's slots, which include
+              # 30 (Head) because the creation's helmet supplies a head. NordwarUA's helmet does
+              # not - it is Hair and Circlet only - so inheriting Redone's slots told the game to
+              # hide the wearer's head and let the helmet replace it. The helmet rendered, the head
+              # vanished. Anything that describes the ART comes from the art's source.
+              b"BOD2"}
 
 # --------------------------------------------------------------------------- naming
 
