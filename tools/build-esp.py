@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Author "Civil War Champion.esp" from the three Civil War Champions mods already installed.
+r"""Author "Civil War Final Battle Equipment.esp" from the three Civil War Champions mods already installed.
 
 WHY THIS EXISTS AT ALL
     The owner has three mods sitting at the top of Njordlinger - Civil War Champions - My Version
@@ -68,7 +68,7 @@ SELF_INDEX = len(OUT_MASTERS) << 24          # our own records live at index 02
 FIRST_ID = SELF_INDEX | 0x000800
 
 AUTHOR = "ApocryphaRealm"
-DESCRIPTION = "Civil War Champion - the champion's armour, before the final siege"
+DESCRIPTION = "The champion's equipment of the Civil War, issued before the final battle"
 
 CC = "ccffbsse001-imperialdragon.esl"        # the Creation Club master none of this needs
 
@@ -123,6 +123,71 @@ MAGIC_HAT_MARKER = 0x000435A5   # the vanilla magic-menu display object
 # person, each with its texture-set companion.
 MODEL_SUBS = {b"MOD2", b"MO2T", b"MOD3", b"MO3T", b"MOD4", b"MO4T", b"MOD5", b"MO5T"}
 
+# --------------------------------------------------------------------------- naming
+
+# THE SETS ARE THIS MOD'S OWN, AND THEY ARE NAMED THAT WAY.
+#
+# The owner, 2026-09-16: "i want you to frame this mod as a seperate mod ... as it is unique from
+# the bethesda file in form and function", and then, choosing the names himself, "rename to ice
+# veins armor and dragon blood armor".
+#
+# Every editor ID and every displayed name the build lifts is rewritten on the way through. The set
+# names change, and so do the four different authors' prefixes that would otherwise be scattered
+# through the plugin - ccFFBSSE001_, DIS_, NW_, MAG_Ench, CRSP_. What comes out is one mod with one
+# naming scheme, which is what it is.
+DISPLAY_RENAME = [
+    ("Storm-Bear", "Ice Veins"),
+    ("Imperial Dragon", "Dragon Blood"),
+]
+EDID_RENAME = [
+    ("StormBear", "IceVeins"),
+    ("Stormbear", "IceVeins"),      # the levelled list spells it with a small b
+    ("Storm-Bear", "IceVeins"),
+    ("ImperialDragon", "DragonBlood"),
+    ("Imperial Dragon", "DragonBlood"),
+]
+EDID_PREFIX = [
+    ("ccFFBSSE001_", "ACWFBE_"),
+    ("ccFFBSSE001", "ACWFBE_"),
+    ("MAG_Ench", "ACWFBE_Ench"),
+    ("CRSP_", "ACWFBE_"),
+    ("DIS_", "ACWFBE_"),
+    ("NW_", "ACWFBE_"),
+    ("Temper", "ACWFBE_Temper"),
+]
+
+# One enchantment came through the sources named "Frost Damage" while every other one carries the
+# name of the piece it sits on. The owner keeps the per-piece naming deliberately - "i like how the
+# enchantments have unique names in the magic affects menu" - so the odd one out is brought into
+# line rather than left generic.
+DISPLAY_FIXUPS = {"Frost Damage": "Ice Veins Axe"}
+
+_seen_edids = {}
+
+
+def rename_names(sig, data, formid):
+    """Rewrite an EDID or a FULL on its way into the new plugin."""
+    text = data[:-1].decode("cp1252")
+    if sig == b"FULL":
+        for old, new in DISPLAY_RENAME:
+            text = text.replace(old, new)
+        text = DISPLAY_FIXUPS.get(text, text)
+    else:
+        for old, new in EDID_RENAME:
+            text = text.replace(old, new)
+        for old, new in EDID_PREFIX:
+            if text.startswith(old):
+                text = new + text[len(old):]
+                break
+        if not text.startswith("ACWFBE_"):
+            text = "ACWFBE_" + text
+        if text in _seen_edids and _seen_edids[text] != formid:
+            raise SystemExit("editor id collision after renaming: %s is wanted by %08X and %08X"
+                             % (text, _seen_edids[text], formid))
+        _seen_edids[text] = formid
+    return text.encode("cp1252") + b"\x00"
+
+
 # --------------------------------------------------------------------------- FormID handling
 
 # Which subrecords hold FormIDs, per record type. Being explicit per type matters: MODL is a list
@@ -154,12 +219,15 @@ def remap_ctda(data, remap):
     return bytes(out)
 
 
-def remap_body(rec, remap, skip=(), replace=None):
+def remap_body(rec, remap, skip=(), replace=None, new_id=None):
     """Rebuild a record body with every FormID translated into the new plugin's numbering."""
     keep = FORMID_SUBS.get(rec.type.decode(), set())
     out = b""
     for sig, data in rec.subs:
         if sig in skip:
+            continue
+        if sig in (b"EDID", b"FULL") and data.endswith(b"\x00"):
+            out += sub(sig, rename_names(sig, data, new_id if new_id is not None else rec.formid))
             continue
         if replace and sig in replace:
             for d in replace[sig]:
@@ -202,6 +270,9 @@ def clone_mgef(rec, new_id, remap):
         # VMAD here is Thaumaturgy's enchanting-XP script and CTDA/KWDA reference its keywords;
         # none of that can travel, and none of it is what the effect DOES.
         if sig in (b"VMAD", b"CTDA", b"KSIZ", b"KWDA"):
+            continue
+        if sig in (b"EDID", b"FULL"):
+            body += sub(sig, rename_names(sig, d, new_id))
             continue
         if sig == b"DATA":
             d = bytes(data)
@@ -267,14 +338,16 @@ def main(out_path):
     kywd_bytes = b""
     for local in SET_KEYWORDS:
         src = E[self_ench | local]
-        kywd_bytes += record(b"KYWD", allot(SRC_ENCH[1], local), src.body())
+        new = allot(SRC_ENCH[1], local)
+        rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
+        kywd_bytes += record(b"KYWD", new, remap_body(src, rm, new_id=new))
 
     ench_bytes = b""
     for local in ENCHANTMENTS:
         src = E[cc_in_ench | local]
         new = allot(CC, local)
         rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
-        ench_bytes += record(b"ENCH", new, remap_body(src, rm))
+        ench_bytes += record(b"ENCH", new, remap_body(src, rm, new_id=new))
         report_unresolved(src, rm)
 
     # ---- 3. armour: My Version's models over Redone's stats and enchantments
@@ -294,7 +367,7 @@ def main(out_path):
         plugin = CC if (f & 0xFF000000) == cc_in_items else SRC_ITEMS[1]
         new = allot(plugin, f & 0xFFFFFF)
         rm = Remapper(m_items, SRC_ITEMS[1], table, OUT_MASTERS)
-        arma_bytes += record(b"ARMA", new, remap_body(src, rm))
+        arma_bytes += record(b"ARMA", new, remap_body(src, rm, new_id=new))
         report_unresolved(src, rm)
 
     armo_bytes = b""
@@ -328,6 +401,9 @@ def main(out_path):
                     body += sub(b"MODL", struct.pack("<I", rmi(struct.unpack("<I", d2)[0])))
                 report_unresolved(mv, rmi)
                 continue
+            if sig in (b"EDID", b"FULL"):
+                body += sub(sig, rename_names(sig, d, new))
+                continue
             if sig == b"CTDA":
                 d = remap_ctda(d, rm)
             elif sig in FORMID_SUBS["ARMO"] and d and len(d) % 4 == 0:
@@ -351,7 +427,8 @@ def main(out_path):
                              % (f, local))
         src = I[f]
         rm = Remapper(m_items, SRC_ITEMS[1], table, OUT_MASTERS)
-        stat_bytes += record(b"STAT", allot(SRC_ITEMS[1], f & 0xFFFFFF), remap_body(src, rm))
+        statid = allot(SRC_ITEMS[1], f & 0xFFFFFF)
+        stat_bytes += record(b"STAT", statid, remap_body(src, rm, new_id=statid))
         report_unresolved(src, rm)
 
     weap_bytes = b""
@@ -361,7 +438,7 @@ def main(out_path):
         rm = Remapper(m_items, SRC_ITEMS[1], table, OUT_MASTERS)
         want_ench = table[(CC, WEAPON_ENCHANT[local])]
         weap_bytes += record(b"WEAP", new,
-                             remap_body(src, rm, skip=(b"VMAD",),
+                             remap_body(src, rm, skip=(b"VMAD",), new_id=new,
                                         replace={b"EITM": [struct.pack("<I", want_ench)]}))
         report_unresolved(src, rm)
 
@@ -379,6 +456,9 @@ def main(out_path):
         rm = Remapper(m_items, SRC_ITEMS[1], table, OUT_MASTERS)
         body, entries = b"", 0
         for sig, d in src.subs:
+            if sig in (b"EDID", b"FULL"):
+                body += sub(sig, rename_names(sig, d, new))
+                continue
             if sig == b"LLCT":
                 continue
             if sig == b"LVLO":
@@ -469,5 +549,5 @@ def report_unresolved(src, rm):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    default = os.path.normpath(os.path.join(here, "..", "dist", "Civil War Champion.esp"))
+    default = os.path.normpath(os.path.join(here, "..", "dist", "Civil War Final Battle Equipment.esp"))
     main(sys.argv[1] if len(sys.argv) > 1 else default)

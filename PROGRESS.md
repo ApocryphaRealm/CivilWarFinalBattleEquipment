@@ -1,6 +1,6 @@
-# Civil War Champion - state
+# Civil War Final Battle Equipment - state
 
-**1.0.0, built 2026-09-16. Installed in Njordlinger as `test Civil War Champion 1.0.0`. NOT yet
+**1.0.0, built 2026-09-16. Installed in Njordlinger as `test Civil War Final Battle Equipment 1.0.0`. NOT yet
 run in game.**
 
 ## What it is
@@ -36,13 +36,14 @@ a forge recipe. Nothing of anyone else's is stored in this repository - see `.gi
   the assets are all present and the seven textures left behind were confirmed vanilla with BSArch.
   What that cannot prove is whether the quest actually fires, whether Ulfric offers the line, and
   whether the armour renders.
-* **The publishing question in `NOTICE.md` section 1.** Unresolved, and it is the blocking one.
-  It is a paywall question - this mod reconstructs a paid creation's sets for somebody who does
-  not own it - and NOT the asset-redistribution question an earlier draft claimed. Nexus's own
-  policy pages have never been read from here (403), so the rules themselves are still unchecked.
-* **One Imperial set entry could not be rebuilt** - Creation Club form `02000D62`, which none of the
-  three mods override, so nothing on this machine knows what it is. The Imperial set ships seven
-  pieces instead of eight; the Stormcloak set is complete.
+* **The publishing framing is settled** - see `NOTICE.md` section 1. The owner's call, 2026-09-16:
+  the mod stands as its own thing, the sets are renamed Ice Veins and Dragon Blood, every editor ID
+  and displayed name in the plugin is ours, and the description makes no comparison to anything.
+  What is still unread is each upstream author's permissions block (403 from here).
+* **The Dragon Blood set is seven items, the Ice Veins set eight.** One entry in the source
+  levelled list resolved to a form nothing on this machine can describe, so it was dropped rather
+  than guessed at. If something obvious is missing from the Imperial set in game, that is where it
+  went.
 * **The dialogue is unvoiced.** Ulfric and General Tullius both have unique voice types, so the
   trick Reduced Cut used - borrowing a vanilla shared response - cannot supply audio for them. The
   line shows as a subtitle. Shipping a silent voice file would hold it on screen properly.

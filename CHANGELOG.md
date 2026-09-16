@@ -1,20 +1,18 @@
-# Civil War Champion - changelog
+# Civil War Final Battle Equipment - changelog
 
 ## 1.0.0 - 2026-09-16
 
-First build. Assembled from three installed mods that cannot themselves run on this machine,
-because all three master a Creation Club creation that is not owned here - see `NOTICE.md`.
+First build. Two sets of Civil War war gear, issued before the final battle.
 
-- **The armour.** Twelve pieces across two sets, with NordwarUA's meshes and textures from Civil
-  War Champions - My Version, and the per-piece statistics and keywords from Civil War Champions
-  Redone. Eighteen armatures, three first-person weapon models, three champion weapons.
-- **The enchantments.** Twelve, from Civil War Champions Redone, each keeping its own name so the
-  magic effects menu is legible.
-- **Thaumaturgy's values without Thaumaturgy.** The nine magic effects those enchantments stand on
-  are cloned into this plugin at Thaumaturgy's own numbers, so the mod is standalone and still
-  lands where Thaumaturgy would have put it.
-- **The quest.** A miscellaneous quest that opens when the final siege is ordered. Ulfric
-  Stormcloak or General Tullius hands the set over in his own hall, before the march - not at the
-  battle, and not through the Creation Club's duel.
-- **Tempering only.** Thirteen tempering recipes ship, ten at the armour table and three at the
-  grindstone. Eight forge recipes were found in the source and deliberately dropped.
+- **The sets.** Ice Veins for the Stormcloaks and Dragon Blood for the Legion: six pieces each,
+  plus three weapons. NordwarUA's meshes and textures throughout - 76 meshes, 44 textures, 18
+  armatures, three first-person weapon models.
+- **The enchantments.** Twelve, one per piece, each named for the piece it sits on so the magic
+  effects menu is legible at a glance.
+- **Nine magic effects of its own**, including six the base game has no equivalent for - Fortify
+  Power Attacks, Fortify Bash Damage, Resist Arrow Damage, Resist Spell Damage, Fortify Shout Power
+  and Shout Duration. Defined inside the plugin, so the mod requires nothing.
+- **The quest.** Opens when the final assault is ordered. Ulfric Stormcloak or General Tullius
+  hands the set over in his own hall, before the march - not at the battle.
+- **Tempering only.** Thirteen recipes, ten at the armour workbench and three at the grindstone.
+  The sets cannot be forged, by design.

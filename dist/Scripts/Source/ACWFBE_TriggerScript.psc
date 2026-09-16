@@ -1,4 +1,4 @@
-Scriptname ACWC_TriggerScript extends Quest
+Scriptname ACWFBE_TriggerScript extends Quest
 {Notices that the final siege has been ordered, and nothing else.
 
  This quest is driven by the Story Manager's Change Location event, so it wakes up whenever the

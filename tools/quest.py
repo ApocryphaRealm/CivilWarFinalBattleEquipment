@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-r"""The quest half of Civil War Champion - authored here rather than lifted.
+r"""The quest half of Civil War Final Battle Equipment - authored here rather than lifted.
 
 WHY AUTHORED AND NOT LIFTED
-    The shape is Kamikaze's, from Civil War Champions - Reduced Cut: a Story Manager node watching
+    The shape is Kamikaze's, from Civil War Final Battle Equipments - Reduced Cut: a Story Manager node watching
     the Change Location event, a helper quest that asks "is the city under siege one of the two
     capitals?", and a miscellaneous quest that puts an objective in the journal and hands the set
     over through one line of dialogue. That shape is the right one and it is credited.
@@ -126,22 +126,22 @@ def build(allot, lvli_imperial, lvli_stormcloak):
     in_sons = ctda(FUNC_IN_FACTION, FACT_SONS, run_on=RUN_ON_REFERENCE, reference=PLAYER_REF)
 
     # ---------------------------------------------------------------- the champion quest
-    body = z_sub(b"EDID", "ACWC_ChampionQuest")
-    body += sub(b"VMAD", vmad_scripts([("ACWC_ChampionQF", [
+    body = z_sub(b"EDID", "ACWFBE_EquipmentQuest")
+    body += sub(b"VMAD", vmad_scripts([("ACWFBE_EquipmentQF", [
         ("PlayerRef", PLAYER_REF, 0xFFFF),
         ("ImperialSet", lvli_imperial, 0xFFFF),
         ("StormcloakSet", lvli_stormcloak, 0xFFFF),
-    ])]) + quest_fragments("ACWC_ChampionQF", [
+    ])]) + quest_fragments("ACWFBE_EquipmentQF", [
         # Stage 10 carries TWO stage items, one per side, so that the journal entry can name the
         # right commander - and a fragment attaches to a stage ITEM, not to the stage. Attaching
         # Fragment_0 only to item 0 would have shown the objective to Stormcloaks and silently
         # skipped it for Imperials, which is the sort of thing that only ever shows up in game.
-        (STAGE_OFFERED, 0, "ACWC_ChampionQF", "Fragment_0"),
-        (STAGE_OFFERED, 1, "ACWC_ChampionQF", "Fragment_0"),
-        (STAGE_IMPERIAL, 0, "ACWC_ChampionQF", "Fragment_1"),
-        (STAGE_STORMCLOAK, 0, "ACWC_ChampionQF", "Fragment_2"),
+        (STAGE_OFFERED, 0, "ACWFBE_EquipmentQF", "Fragment_0"),
+        (STAGE_OFFERED, 1, "ACWFBE_EquipmentQF", "Fragment_0"),
+        (STAGE_IMPERIAL, 0, "ACWFBE_EquipmentQF", "Fragment_1"),
+        (STAGE_STORMCLOAK, 0, "ACWFBE_EquipmentQF", "Fragment_2"),
     ]))
-    body += z_sub(b"FULL", "Civil War Champion")
+    body += z_sub(b"FULL", "Civil War Final Battle Equipment")
     # flags 0x0100 = run once; priority 30; quest type 6 = Miscellaneous, so it sits in the
     # journal's Misc list exactly as Reduced Cut's did.
     body += sub(b"DNAM", struct.pack("<HBBII", 0x0100, 30, 0xFF, 0, 6))
@@ -150,22 +150,22 @@ def build(allot, lvli_imperial, lvli_stormcloak):
     body += sub(b"INDX", struct.pack("<HBB", STAGE_OFFERED, 0, 0))
     body += sub(b"QSDT", b"\x00") + in_sons + z_sub(b"CNAM",
         "Ulfric Stormcloak has given the order to march on Solitude. Before we go, there is a "
-        "champion's harness waiting for me in the Palace of the Kings.")
+        "set of Ice Veins armour waiting for me in the Palace of the Kings.")
     body += sub(b"QSDT", b"\x00") + in_imperial + z_sub(b"CNAM",
         "General Tullius has given the order to march on Windhelm. Before we go, there is a "
-        "champion's harness waiting for me in Castle Dour.")
+        "set of Dragon Blood armour waiting for me in Castle Dour.")
 
     body += sub(b"INDX", struct.pack("<HBB", STAGE_IMPERIAL, 0, 0))
     body += sub(b"QSDT", b"\x01") + z_sub(b"CNAM",
-        "General Tullius has given me the Imperial Dragon armour. I will wear it into Windhelm.")
+        "General Tullius has given me the Dragon Blood armour. I will wear it into Windhelm.")
 
     body += sub(b"INDX", struct.pack("<HBB", STAGE_STORMCLOAK, 0, 0))
     body += sub(b"QSDT", b"\x01") + z_sub(b"CNAM",
-        "Ulfric Stormcloak has given me the Storm-Bear armour. I will wear it into Solitude.")
+        "Ulfric Stormcloak has given me the Ice Veins armour. I will wear it into Solitude.")
 
     body += sub(b"QOBJ", struct.pack("<h", STAGE_OFFERED))
     body += sub(b"FNAM", struct.pack("<I", 0))
-    body += z_sub(b"NNAM", "Collect the champion's armour from your commander")
+    body += z_sub(b"NNAM", "Collect your armour from your commander")
     body += sub(b"QSTA", struct.pack("<II", 1, 0)) + in_sons
     body += sub(b"QSTA", struct.pack("<II", 2, 0)) + in_imperial
 
@@ -175,8 +175,8 @@ def build(allot, lvli_imperial, lvli_stormcloak):
     champion = record(b"QUST", q_champion, body)
 
     # ---------------------------------------------------------------- the trigger quest
-    body = z_sub(b"EDID", "ACWC_TriggerQuest")
-    body += sub(b"VMAD", vmad_scripts([("ACWC_TriggerScript", [
+    body = z_sub(b"EDID", "ACWFBE_TriggerQuest")
+    body += sub(b"VMAD", vmad_scripts([("ACWFBE_TriggerScript", [
         ("ChampionQuest", q_champion, 0xFFFF),
         ("FinalSiegeLocations", flst, 0xFFFF),
         ("SiegeCity", q_trigger, 1),
@@ -194,7 +194,7 @@ def build(allot, lvli_imperial, lvli_stormcloak):
     trigger = record(b"QUST", q_trigger, body)
 
     # ---------------------------------------------------------------- Story Manager node
-    body = z_sub(b"EDID", "ACWC_TriggerNode")
+    body = z_sub(b"EDID", "ACWFBE_TriggerNode")
     body += sub(b"PNAM", struct.pack("<I", SM_CHANGE_LOCATION))
     body += sub(b"CITC", struct.pack("<I", 2))
     # Only while the siege quest is actually running, and only once - the champion quest having
@@ -208,21 +208,21 @@ def build(allot, lvli_imperial, lvli_stormcloak):
     node = record(b"SMQN", smqn, body)
 
     # ---------------------------------------------------------------- form list
-    body = z_sub(b"EDID", "ACWC_FinalSiegeLocations")
+    body = z_sub(b"EDID", "ACWFBE_FinalSiegeLocations")
     body += sub(b"LNAM", struct.pack("<I", LOC_SOLITUDE))
     body += sub(b"LNAM", struct.pack("<I", LOC_WINDHELM))
     formlist = record(b"FLST", flst, body)
 
     # ---------------------------------------------------------------- dialogue
-    body = z_sub(b"EDID", "ACWC_ChampionBranch")
+    body = z_sub(b"EDID", "ACWFBE_EquipmentBranch")
     body += sub(b"QNAM", struct.pack("<I", q_champion))
     body += sub(b"TNAM", struct.pack("<I", 0))
     body += sub(b"DNAM", struct.pack("<I", 1))
     body += sub(b"SNAM", struct.pack("<I", dial))
     branch = record(b"DLBR", dlbr, body)
 
-    body = z_sub(b"EDID", "ACWC_ChampionTopic")
-    body += z_sub(b"FULL", "I'll take the champion's armour.")
+    body = z_sub(b"EDID", "ACWFBE_EquipmentTopic")
+    body += z_sub(b"FULL", "I'll take the armour, then.")
     body += sub(b"PNAM", struct.pack("<f", 50.0))
     body += sub(b"BNAM", struct.pack("<I", dlbr))
     body += sub(b"QNAM", struct.pack("<I", q_champion))
@@ -232,13 +232,13 @@ def build(allot, lvli_imperial, lvli_stormcloak):
     topic = record(b"DIAL", dial, body)
 
     infos = info(info_sons, 0, NPC_ULFRIC, q_champion, "Fragment_1",
-                 "Let me lead the assault as your champion.",
-                 "Then wear this. It was worn by the last man to take Solitude from the Empire. "
-                 "See that it does the same again.")
+                 "Let me lead the assault, and give me the harness for it.",
+                 "Then wear this. Ice runs in the veins of the men who took Solitude before. "
+                 "See that it runs in yours.")
     infos += info(info_imperial, info_sons, NPC_TULLIUS, q_champion, "Fragment_0",
-                  "Let me lead the assault as your champion, General.",
-                  "Take it. The Legion's champions have worn that harness for four hundred years. "
-                  "Don't be the one who disgraces it.")
+                  "Let me lead the assault, General, and give me the harness for it.",
+                  "Take it. There is dragon blood in that steel, and four hundred years of the Legion "
+                  "behind it. Don't be the one who disgraces it.")
 
     groups = [
         (b"QUST", champion + trigger),
@@ -267,8 +267,8 @@ def alias_unique(alias_id, name, npc):
 
 
 def info(form, previous, speaker, quest, fragment, player_line, response):
-    body = sub(b"VMAD", vmad_scripts([("ACWC_TIF", [])]) +
-               info_fragment("ACWC_TIF", "ACWC_TIF", fragment))
+    body = sub(b"VMAD", vmad_scripts([("ACWFBE_TIF", [])]) +
+               info_fragment("ACWFBE_TIF", "ACWFBE_TIF", fragment))
     body += sub(b"ENAM", struct.pack("<HH", 0, 0))
     body += sub(b"PNAM", struct.pack("<I", previous))
     body += sub(b"CNAM", b"\x00")

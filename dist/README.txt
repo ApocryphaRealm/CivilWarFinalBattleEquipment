@@ -1,50 +1,76 @@
-CIVIL WAR CHAMPION
-==================
+CIVIL WAR FINAL BATTLE EQUIPMENT
+================================
 
-The champion's armour of the Civil War, given to you before the final assault.
+Two sets of war gear for the end of the Civil War, issued to you by the man who leads your side,
+in his own hall, before the last army marches.
 
 WHAT HAPPENS IN GAME
-    When the last order is given - when Ulfric Stormcloak sends the army to Solitude, or General
-    Tullius sends it to Windhelm - a miscellaneous quest appears: "Civil War Champion". Your
-    commander has a champion's harness for you. Speak to him where he stands, in the Palace of the
-    Kings or in Castle Dour, and he hands over the set: cuirass, helmet, gauntlets, boots, shield,
-    cloak and the champion's weapon.
+    When the final assault is ordered - when Ulfric Stormcloak sends the army to Solitude, or
+    General Tullius sends it to Windhelm - a quest appears: "Civil War Final Battle Equipment".
+    Your commander has kept a harness back for whoever leads the attack.
 
-    You get it BEFORE you march, not at the battle, and not by fighting a duel for it.
+    Speak to him where he stands. Ulfric in the Palace of the Kings, Tullius in Castle Dour. He
+    hands the set over and you wear it into the last battle.
 
-WHAT IS IN THE SET
-    Stormcloak - Storm-Bear cuirass, helmet, gauntlets, boots, shield and cloak, the Storm-Bear
-                 war axe and Tsun's Judgement.
-    Imperial   - Imperial Dragon cuirass, helmet, gauntlets, boots, shield and cloak, and the
-                 sword Dragon's Oath.
+    You get it BEFORE you march. Not at the walls, not off a corpse, and not for winning a duel.
 
-    Every piece is enchanted, and every enchantment has its own name, so the magic effects menu
-    reads "Storm-Bear Helmet" rather than "Fortify Block". The values match Thaumaturgy's, but
-    Thaumaturgy is NOT required - the effects are defined inside this plugin.
+THE SETS
+    ICE VEINS - for the Stormcloaks. Cuirass, helmet, gauntlets, boots, shield and cloak, the
+    Ice Veins Axe, and the greataxe Tsun's Judgement.
+
+    DRAGON BLOOD - for the Legion. Cuirass, helmet, gauntlets, boots, shield and cloak, and the
+    sword Dragon's Oath.
+
+    Every piece is enchanted and every enchantment carries its own name, so the magic effects menu
+    reads "Ice Veins Helmet" rather than "Fortify Block" - you can see at a glance what the set is
+    doing for you. Several of the effects have no base-game equivalent: Fortify Power Attacks,
+    Fortify Bash Damage, Resist Arrow Damage, Resist Spell Damage, Fortify Shout Power and Shout
+    Duration. They are defined inside this plugin, so nothing else has to be installed for them to
+    work, and they are balanced to sit alongside a modern enchanting overhaul rather than
+    trivialise one.
 
 CRAFTING
-    There is none, deliberately. These are one-of-a-kind sets given by the head of an army; they
-    are not something you hammer out at a forge. They CAN be tempered - at the armour table for
-    the armour, at the grindstone for the weapons - so the set keeps up with you.
+    There is none, and that is deliberate. These are one-of-a-kind harnesses handed out by the head
+    of an army - not something you hammer out at a forge because you found the recipe.
+
+    They CAN be tempered, so the set keeps up with you: the armour at an armour workbench, the
+    weapons at a grindstone.
 
 REQUIREMENTS
-    Skyrim Special Edition. Nothing else. No script extender, no Creation Club content, no
-    Thaumaturgy, no Guards Armor Replacer, no Sons of Skyrim - the meshes and textures are in this
-    download and the plugin declares two masters, Skyrim.esm and Update.esm.
+    Skyrim Special Edition. Nothing else.
+
+    No script extender, no framework, no Address Library, no DLL, and no other mod of any kind.
+    The meshes and textures are in this download and the plugin declares two masters, Skyrim.esm
+    and Update.esm.
 
 INSTALLING
-    Install with a mod manager and enable the plugin. Load order does not matter.
+    Install with a mod manager and enable the plugin. Load order does not matter - nothing here
+    overrides anything.
+
+    To remove it: uninstall. Nothing in the vanilla game is changed, so nothing is left behind
+    except whatever you were carrying.
 
 IF THE QUEST DOES NOT APPEAR
-    It starts from the Story Manager when the vanilla siege quest names Solitude or Windhelm as its
-    target, so it needs one change of location after that order is given. If it still has not
+    It opens from the Story Manager once the vanilla siege quest has named Solitude or Windhelm as
+    its target, so it needs one change of location after that order is given. If it still has not
     appeared, the console will start it by hand:
 
-        setstage ACWC_ChampionQuest 10
+        setstage ACWFBE_EquipmentQuest 10
 
-CREDITS
-    The armour and the meshes are NordwarUA's, by way of Civil War Champions - My Version.
-    The enchantments are from Civil War Champions Redone.
-    The idea of handing the armour over before the siege instead of duelling for it is Kamikaze's,
-    from Civil War Champions - Reduced Cut.
-    Full credit, links and licence notes are in NOTICE.md in the source repository.
+COMPATIBILITY
+    It adds records and overrides none, so there is no conflict surface. It does not touch Ulfric's
+    or General Tullius's NPC records - it reaches them through quest aliases instead - so face
+    replacers, NPC overhauls and AI mods keep their work. No leveled lists, no cells, no navmesh,
+    no game settings.
+
+    The armour is built for the vanilla body and is not BodySlide-refitted.
+
+    The two lines of dialogue are unvoiced and show as subtitles.
+
+CREDIT
+    The meshes and textures are NordwarUA's, from his Sons of Skyrim and Legion armour work.
+    The enchantment balance came from Civil War Champions Redone.
+    The idea of issuing the gear before the final siege is Kamikaze's, from Civil War Champions -
+    Reduced Cut.
+
+    Full credit and licence notes are in NOTICE.md in the source repository.

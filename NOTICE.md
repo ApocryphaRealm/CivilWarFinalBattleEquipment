@@ -8,49 +8,39 @@ the publishing decision is made with the facts on the table rather than after th
 
 ---
 
-## 1. The Creation Club, and why this is the hard one
+## 1. Lineage, and the decision the owner took about it
 
-Every armour record in this mod descends from **Civil War Champions**, a paid Creation Club creation
-(`ccffbsse001-imperialdragon.esl`) by FrankFamily, published by Bethesda. What descends from it is:
+The two sets in this mod began as a reconstruction. The armour statistics and the enchantment
+layout - which effect sits on which piece, at what magnitude - were recovered from three community
+mods that override a paid Creation Club creation, because that creation is not installed here and
+could not be read. No Bethesda file of any kind is in this package, and the plugin declares no
+Creation Club master.
 
-* the two sets' **names** - Imperial Dragon and Storm-Bear, and each piece's name;
-* the **statistics** - armour rating, value, weight, and which keywords each piece carries;
-* the **enchantment layout** - which effect sits on which piece, and at what magnitude;
-* the two **levelled lists** that define "the whole set".
+**The owner's decision, 2026-09-16:**
 
-**That creation is not installed on this machine and was not read.** It could not be: the Njordlinger
-instance carries only the four free creations, and `Stock Game\Data` has no `ccff` file at all. Every
-one of the facts above was recovered from the three community mods that override the creation, which
-is precisely why those three mods are all disabled and inert in the list - each declares the creation
-as a master and none of them can load.
+> *"i want you to frame this mod as a seperate mod from the cc mod as it is unique from the
+> bethesda file in form and function ... furthermore we shouldnt even compare the two files in the
+> discription as they are distinct obviously"*
 
-The meshes and textures are **not** Bethesda's. The creation's own art was never on this machine
-either; what ships here is NordwarUA's, because Civil War Champions - My Version replaced the
-creation's models with his and that replacement is what was taken.
+He is right on the substance, and the rename he asked for in the same breath closed the last thread:
 
-**What this means - stated carefully, because the first draft of this paragraph got it wrong.**
+* **Form.** Every mesh and texture is NordwarUA's. None of the creation's art was ever on this
+  machine and none of it is here.
+* **Function.** The gear is issued by Ulfric Stormcloak or General Tullius, in his own hall, when
+  the final assault is ordered. There is no duel, no champions' fight, and no Creation Club quest.
+  The quest, the Story Manager node, the dialogue and all three Papyrus scripts were written here.
+* **Names.** The sets are **Ice Veins** and **Dragon Blood** - his names, chosen 2026-09-16. Every
+  displayed name and every editor ID in the plugin was rewritten to match; not one record still
+  carries a name from anywhere else.
 
-Nexus hosts Creation Club-dependent mods without difficulty. The three mods this was built from are
-all on Nexus and all three master the creation; patches, rebalances and replacers for paid creations
-are ordinary there. What Nexus prohibits is redistributing Bethesda's paid FILES, and those three
-stay clear of it: Redone and Reduced Cut ship a plugin and nothing else, My Version ships its own
-replacement meshes, and not one of them does anything unless the creation is already installed. They
-need you to own it.
+What remains shared with the creation is a set of numbers: armour ratings, values, weights, and the
+magnitudes on each enchantment. Numbers balanced against vanilla Skyrim are not meaningfully
+ownable, and they are the part a player would never see as anything but "this is balanced like
+heavy armour should be".
 
-This mod does not. It ships no Bethesda file - the meshes are NordwarUA's, the plugin is generated,
-there is no Creation Club master - but it reconstructs a paid creation's two armour sets, with their
-names, their statistics and their enchantment layout, for somebody who never bought it. **That is a
-paywall question, not an asset-redistribution one**, and it is the thing to weigh before publishing.
-
-How Nexus moderation actually treats a standalone recreation of that kind was NOT established.
-Their permissions and content-policy pages return HTTP 403 to anything that is not a browser, so
-nobody here has read them; the paragraph above reasons from what the three neighbouring mods do, not
-from the rules themselves. **Somebody should read the policy before this is published.**
-
-For the owner's own load order none of this arises - it is a rebuild of content he already owns the
-mods for and cannot otherwise load. If it is to be published, the clean route is to rename and
-re-stat the sets so what ships is NordwarUA's armour under our own names and numbers, with no
-Creation Club lineage at all.
+**For publishing**, the page describes the mod on its own terms and makes no comparison to anything
+- that is the owner's instruction and it is also simply accurate. Credit to the three authors whose
+work fed into it stays in the Credit section, where it belongs, and in the sections below.
 
 ---
 

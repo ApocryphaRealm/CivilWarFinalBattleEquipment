@@ -1,5 +1,5 @@
-Scriptname ACWC_ChampionQF extends Quest Hidden
-{Stage fragments for the Civil War Champion quest.
+Scriptname ACWFBE_EquipmentQF extends Quest Hidden
+{Stage fragments for the Civil War Final Battle Equipment quest.
 
  Stage 10 puts the objective in the journal. Stages 100 and 110 hand over the set - one per side -
  and the stage itself is flagged "complete quest" in the record, so nothing here has to stop the
