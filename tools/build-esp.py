@@ -63,6 +63,10 @@ SRC_ENCH = (os.path.join(MODS, "Civil War Champions Redone - SE", "CivilWarChamp
 SRC_THAUM = (os.path.join(MODS, "Thaumaturgy - An Enchanting Overhaul", "Thaumaturgy.esp"),
              "Thaumaturgy.esp")
 
+# Several of the armour's effects are the base game's own, so Skyrim.esm is read too - they have to
+# be CLONED and renamed like the rest, or the Magic menu goes back to reading "Fortify Block".
+GAME_DATA = os.path.join(os.path.dirname(MODS), "Stock Game", "Data")
+
 OUT_MASTERS = ["Skyrim.esm", "Update.esm"]
 SELF_INDEX = len(OUT_MASTERS) << 24          # our own records live at index 02
 FIRST_ID = SELF_INDEX | 0x000800
@@ -271,21 +275,74 @@ def remap_body(rec, remap, skip=(), replace=None, new_id=None):
 # game's defaults.
 MGEF_ART_OFFSETS = (24, 32, 36, 72, 76, 92, 96, 100, 108, 116, 120, 124, 128, 132, 136)
 
+HIDE_IN_UI = 0x00008000
 
-def clone_mgef(rec, new_id, remap):
+# Ten of the armour's effects are the base game's own, and Skyrim.esm is LOCALIZED: its DNAM holds
+# a four-byte string id, not a sentence, and the real text lives in a .STRINGS table inside a BSA.
+# Rather than make the build depend on unpacking that archive, the ten are written out here, in the
+# base game's own phrasing, with <mag> left for describe() to fill from the actual magnitude. They
+# are keyed by editor id because EDIDs are NOT localized and can be read straight off the record.
+VANILLA_EFFECT_TEXT = {
+    "EnchFortifyBlockConstantSelf": "Blocking absorbs <mag>% more damage.",
+    "EnchFortifyCarryConstantSelf": "Carrying capacity increased by <mag>.",
+    "EnchFortifyOneHandedConstantSelf": "One-handed attacks do <mag>% more damage.",
+    "EnchFortifySmithingConstantSelf": "Weapons and armour are tempered <mag>% better.",
+    "EnchFortifyStaminaConstantSelf": "Increases your Stamina by <mag> points.",
+    "EnchFortifyTwoHandedConstantSelf": "Two-handed attacks do <mag>% more damage.",
+    "EnchResistFireConstantSelf": "Increases Fire Resistance by <mag>%.",
+    "EnchResistFrostConstantSelf": "Increases Frost Resistance by <mag>%.",
+    "EnchResistMagicConstantSelf": "Increases Magic Resistance by <mag>%.",
+    "EnchResistShocktConstantSelf": "Increases Shock Resistance by <mag>%.",
+}
+
+
+def describe(template, magnitude, duration):
+    """Turn a magic effect's description template into a sentence with the real numbers in it.
+
+    The game substitutes <mag> and <dur> from the effect's own magnitude and duration. These
+    descriptions get merged - one row in the Magic menu now stands for everything a piece does -
+    so the substitution has to happen here, at build time, or the second effect's numbers would be
+    lost and the first effect's would be printed twice."""
+    text = template.replace("<mag>", "%g" % magnitude).replace("<dur>", "%g" % duration)
+    text = text.replace("<magnitude>", "%g" % magnitude).strip()
+    if text and not text.endswith((".", "!", "?")):
+        text += "."
+    return text
+
+
+def clone_mgef(rec, new_id, remap, name=None, description=None, hidden=False):
+    """Copy a magic effect into this plugin, renamed for the piece that grants it.
+
+    `name` replaces what the Magic menu shows on the row, `description` what a hover reveals, and
+    `hidden` sets the Hide in UI flag so an effect applies without adding its own row - used for
+    every effect after the first on a piece, so one piece produces exactly one line."""
     data = bytearray(rec.get(b"DATA"))
     for off in MGEF_ART_OFFSETS:
         v = struct.unpack_from("<I", data, off)[0]
         if v and (v >> 24) >= 2:            # points into Thaumaturgy or a DLC - drop it
             struct.pack_into("<I", data, off, 0)
+    if hidden:
+        flags = struct.unpack_from("<I", data, 0)[0] | HIDE_IN_UI
+        struct.pack_into("<I", data, 0, flags)
     body = b""
+    emitted = set()
     for sig, d in rec.subs:
         # VMAD here is Thaumaturgy's enchanting-XP script and CTDA/KWDA reference its keywords;
         # none of that can travel, and none of it is what the effect DOES.
         if sig in (b"VMAD", b"CTDA", b"KSIZ", b"KWDA"):
             continue
-        if sig in (b"EDID", b"FULL"):
-            body += sub(sig, rename_names(sig, d, new_id))
+        if sig == b"EDID":
+            stem = (name or "Effect").replace(" ", "").replace("'", "")
+            body += sub(b"EDID", z("ACWFBE_%sEffect%d" % (stem, new_id & 0xFF)))
+            emitted.add(b"EDID")
+            continue
+        if sig == b"FULL" and name is not None:
+            body += sub(b"FULL", z(name))
+            emitted.add(b"FULL")
+            continue
+        if sig == b"DNAM" and description is not None:
+            body += sub(b"DNAM", z(description))
+            emitted.add(b"DNAM")
             continue
         if sig == b"DATA":
             d = bytes(data)
@@ -296,6 +353,14 @@ def clone_mgef(rec, new_id, remap):
             f = struct.unpack("<I", d)[0]
             d = struct.pack("<I", MAGIC_HAT_MARKER if (f >> 24) >= 2 else remap(f))
         body += sub(sig, d)
+    # A few of the vanilla effects carry no FULL or no DNAM of their own. The row still has to be
+    # named for its piece and still has to explain itself, so anything the source did not supply is
+    # appended rather than quietly skipped.
+    if name is not None and b"FULL" not in emitted:
+        body += sub(b"FULL", z(name))
+    if description:
+        if b"DNAM" not in emitted:
+            body += sub(b"DNAM", z(description))
     return record(b"MGEF", new_id, body)
 
 
@@ -330,22 +395,34 @@ def main(out_path):
             next_id[0] += 1
         return table[key]
 
-    # ---- 1. the nine Thaumaturgy magic effects the enchantments stand on
-    needed_mgef = []
-    for local in ENCHANTMENTS:
-        r = E[cc_in_ench | local]
-        for d in r.all(b"EFID"):
-            f = struct.unpack("<I", d)[0]
-            if (f & 0xFF000000) == thaum_in_ench and (f & 0xFFFFFF) not in needed_mgef:
-                needed_mgef.append(f & 0xFFFFFF)
+    # ---- 1. every magic effect the armour uses, wherever it came from
+    #
+    # The Magic menu names each row after the EFFECT, not after the enchantment or the ability, so
+    # sharing effects between pieces is what produced rows reading "Fortify Power Attacks". The
+    # owner: "I want the enchantment effects that appear under the active effects in the magic menu
+    # to instead of being their normal vanilla counterparts to be named the ice veins effect ...
+    # I just don't like the generic enchantment names."
+    #
+    # So every piece gets its OWN copies, named for the piece. They are collected here - some come
+    # from Thaumaturgy, some straight out of Skyrim.esm - and renamed per piece in step 3a.
+    skyrim_mgef = {}
+    sk_recs, _ = read_plugin(os.path.join(GAME_DATA, "Skyrim.esm"))
+    for r in sk_recs[1:]:
+        if r.type == b"MGEF":
+            skyrim_mgef[r.formid] = r
+    del sk_recs
+
+    def source_effect(formid):
+        """Find a magic effect by the FormID an enchantment in Redone points at."""
+        top = formid & 0xFF000000
+        if top == thaum_in_ench:
+            return T[self_thaum | (formid & 0xFFFFFF)], m_thaum, SRC_THAUM[1]
+        if top == 0:
+            return skyrim_mgef[formid], ["Skyrim.esm"], "Skyrim.esm"
+        raise SystemExit("effect %08X comes from a plugin this mod cannot reach" % formid)
+
     mgef_bytes = b""
-    for local in needed_mgef:
-        src = T[self_thaum | local]
-        new = allot(SRC_THAUM[1], local)
-        rm = Remapper(m_thaum, SRC_THAUM[1], table, OUT_MASTERS)
-        mgef_bytes += clone_mgef(src, new, rm)
-        if rm.unresolved:
-            raise SystemExit("MGEF %s still needs %s" % (src.edid(), rm.unresolved))
+    mgef_count = [0]
 
     # ---- 2. Redone's two set keywords, its twelve enchantments
     kywd_bytes = b""
@@ -359,6 +436,25 @@ def main(out_path):
     # hit, and seeing it on the item card is normal. The armour's twelve become abilities instead -
     # see step 3a - because an object enchantment always prints its effects on the inventory card
     # and no flag prevents it.
+    # The weapon enchantments stand on two of Thaumaturgy's effects as well - Weakness to Fire and
+    # Damage Armor. Those are cloned under their OWN names, not a weapon's: a weapon enchantment is
+    # meant to be legible on the item card, and "Weakness to Fire" is what it does.
+    for local in sorted(set(WEAPON_ENCHANT.values())):
+        for d in E[cc_in_ench | local].all(b"EFID"):
+            f = struct.unpack("<I", d)[0]
+            if (f & 0xFF000000) != thaum_in_ench:
+                continue
+            eff_local = f & 0xFFFFFF
+            key = (SRC_THAUM[1].lower(), eff_local)
+            if key in table:
+                continue
+            src = T[self_thaum | eff_local]
+            new = allot(SRC_THAUM[1], eff_local)
+            rm = Remapper(m_thaum, SRC_THAUM[1], table, OUT_MASTERS)
+            mgef_bytes += clone_mgef(src, new, rm)
+            mgef_count[0] += 1
+            report_unresolved(src, rm)
+
     ench_bytes = b""
     for local in sorted(set(WEAPON_ENCHANT.values())):
         src = E[cc_in_ench | local]
@@ -387,7 +483,7 @@ def main(out_path):
         arma_bytes += record(b"ARMA", new, remap_body(src, rm, new_id=new))
         report_unresolved(src, rm)
 
-    armo_bytes, piece_ids, piece_enchants = b"", [], []
+    armo_bytes, piece_ids, piece_enchants, piece_names = b"", [], [], []
     for local, name in ARMOUR:
         base = E[cc_in_ench | local]          # Redone: stats, keywords, enchantment, name
         mv = I[cc_in_items | local]           # My Version: the meshes and the armatures
@@ -396,6 +492,7 @@ def main(out_path):
         if eitm:
             piece_ids.append(new)
             piece_enchants.append(struct.unpack("<I", eitm)[0] & 0xFFFFFF)
+            piece_names.append(rename_names(b"FULL", base.get(b"FULL"), new)[:-1].decode("cp1252"))
         rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
         body = b""
         emitted_modl = False
@@ -453,28 +550,65 @@ def main(out_path):
     # magnitudes and under the same name. The vanilla precedent is exact: TGFullSet and DBFullSet,
     # the Thieves Guild and Dark Brotherhood armour bonuses, are Abilities built this way.
     spel_bytes, ability_ids = b"", []
-    for piece_new, ench_local in zip(piece_ids, piece_enchants):
+    for piece_new, ench_local, piece_name in zip(piece_ids, piece_enchants, piece_names):
         src = E[cc_in_ench | ench_local]
         new = allot("acwfbe-ability", ench_local)
-        rm = Remapper(m_ench, SRC_ENCH[1], table, OUT_MASTERS)
-        body = sub(b"EDID", z(rename_names(b"EDID", src.get(b"EDID"), new)[:-1].decode("cp1252")
-                              .replace("Ench", "Ability")))
+
+        # Pair up each effect with its magnitude and duration before cloning, so the description
+        # can be written with the real numbers in it.
+        effects, pending = [], None
+        for sig, d in src.subs:
+            if sig == b"EFID":
+                pending = struct.unpack("<I", d)[0]
+            elif sig == b"EFIT" and pending is not None:
+                mag, area, dur = struct.unpack("<fII", d)
+                effects.append((pending, d, mag, dur))
+                pending = None
+
+        # One row in the Magic menu per PIECE, not per effect: the first effect keeps the piece's
+        # name and carries the whole explanation, and every effect after it is flagged Hide in UI
+        # so it still applies but adds no second row. This is the one place that flag is the right
+        # tool - it is hiding a duplicate line, not the information.
+        sentences = []
+        for source_id, _efit, mag, dur in effects:
+            rec, _masters, _plugin = source_effect(source_id)
+            template = VANILLA_EFFECT_TEXT.get(rec.edid())
+            if template is None:
+                dnam = rec.get(b"DNAM")
+                # A four-byte DNAM is a localized string id, not text. If one turns up that this
+                # build has no wording for, say so rather than writing the raw bytes into the game.
+                if dnam is not None and len(dnam) == 4:
+                    raise SystemExit("magic effect %s has a localized description and no entry in "
+                                     "VANILLA_EFFECT_TEXT - add its wording" % rec.edid())
+                template = dnam[:-1].decode("cp1252", "replace") if dnam and len(dnam) > 1 else ""
+            text = describe(template, mag, dur)
+            if text and text not in sentences:
+                sentences.append(text)
+        blurb = " ".join(sentences)
+
+        effect_ids = []
+        for n, (source_id, _efit, _mag, _dur) in enumerate(effects):
+            rec, masters_of, plugin_of = source_effect(source_id)
+            eff_new = allot("acwfbe-effect", (ench_local << 8) | n)
+            rm_e = Remapper(masters_of, plugin_of, table, OUT_MASTERS)
+            mgef_bytes += clone_mgef(rec, eff_new, rm_e, name=piece_name,
+                                     description=blurb if n == 0 else "",
+                                     hidden=(n > 0))
+            mgef_count[0] += 1
+            effect_ids.append(eff_new)
+
+        body = sub(b"EDID", z("ACWFBE_" + piece_name.replace(" ", "") + "Ability"))
         body += sub(b"OBND", b"\x00" * 12)
-        body += sub(b"FULL", rename_names(b"FULL", src.get(b"FULL"), new))
+        body += sub(b"FULL", z(piece_name))
         body += sub(b"ETYP", struct.pack("<I", ABILITY_EQUIP_TYPE))
-        body += sub(b"DESC", z(""))
+        body += sub(b"DESC", z(blurb))
         # cost 0, manual-cost flag, type 4 = Ability, constant effect, self - TGFullSet's own shape.
         body += sub(b"SPIT", struct.pack("<IIIfIIffI", 0, 1, 4, 0.5, 0, 0, 0.0, 0.0, 0))
-        for sig, d in src.subs:
-            if sig in (b"EFID", b"EFIT", b"CTDA"):
-                if sig == b"EFID":
-                    d = struct.pack("<I", rm(struct.unpack("<I", d)[0]))
-                elif sig == b"CTDA":
-                    d = remap_ctda(d, rm)
-                body += sub(sig, d)
+        for (source_id, efit, _mag, _dur), eff_new in zip(effects, effect_ids):
+            body += sub(b"EFID", struct.pack("<I", eff_new))
+            body += sub(b"EFIT", efit)
         spel_bytes += record(b"SPEL", new, body)
         ability_ids.append(new)
-        report_unresolved(src, rm)
 
     pieces_flst = allot("acwfbe", 0x920)
     abilities_flst = allot("acwfbe", 0x921)
@@ -600,7 +734,7 @@ def main(out_path):
     open(out_path, "wb").write(blob)
 
     print("wrote %s  (%d bytes)" % (out_path, len(blob)))
-    print("  magic effects cloned from Thaumaturgy .... %d" % len(needed_mgef))
+    print("  magic effects, one set per piece ......... %d" % mgef_count[0])
     print("  enchantments ............................. %d" % len(ENCHANTMENTS))
     print("  armour pieces ............................ %d  (%d armatures)"
           % (len(ARMOUR), len(arma_needed)))

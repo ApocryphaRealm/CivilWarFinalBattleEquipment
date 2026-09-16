@@ -55,6 +55,10 @@ FUNC_GET_IS_ID = 72
 RUN_ON_SUBJECT = 0
 RUN_ON_REFERENCE = 2
 
+# Vanilla CWSharedInfos lines, borrowed for their audio - see info() for why these two.
+SHARED_RESPONSE_ULFRIC = 0x000E6D9B    # "Get down there and join Galmar on the front line."
+SHARED_RESPONSE_TULLIUS = 0x000E6D72   # "Get down there and join Rikke on the front line."
+
 STAGE_OFFERED = 10
 STAGE_IMPERIAL = 100
 STAGE_STORMCLOAK = 110
@@ -286,14 +290,17 @@ def build(allot, lvli_imperial, lvli_stormcloak):
     body += sub(b"TIFC", struct.pack("<I", 2))
     topic = record(b"DIAL", dial, body)
 
+    # The player REPORTS; he does not ask for anything. The owner, on the first draft: "i didnt
+    # like how the dialog had the player demanding a harness from ulfric". Presenting yourself for
+    # the assault is the soldierly thing to say, the commander answering "get down there and join
+    # Galmar on the front line" follows from it naturally, and the harness arriving is his doing
+    # rather than something you asked for.
     infos = info(info_sons, 0, NPC_ULFRIC, q_champion, "Fragment_1",
-                 "Let me lead the assault, and give me the harness for it.",
-                 "Then wear this. Ice runs in the veins of the men who took Solitude before. "
-                 "See that it runs in yours.")
+                 "I'm ready to march on Solitude.",
+                 SHARED_RESPONSE_ULFRIC)
     infos += info(info_imperial, info_sons, NPC_TULLIUS, q_champion, "Fragment_0",
-                  "Let me lead the assault, General, and give me the harness for it.",
-                  "Take it. There is dragon blood in that steel, and four hundred years of the Legion "
-                  "behind it. Don't be the one who disgraces it.")
+                  "I'm ready to march on Windhelm, General.",
+                  SHARED_RESPONSE_TULLIUS)
 
     groups = [
         (b"QUST", champion + trigger),
@@ -321,17 +328,30 @@ def alias_unique(alias_id, name, npc):
     return body
 
 
-def info(form, previous, speaker, quest, fragment, player_line, response):
+def info(form, previous, speaker, quest, fragment, player_line, shared_response):
+    """One topic info. The NPC's reply is SHARED from a vanilla line rather than written here.
+
+    DNAM points at an existing INFO and the game reuses its response - text and voice file both.
+    That is the only way to get a spoken reply out of these two: Ulfric and General Tullius each
+    have a unique voice type, so a line borrowed from any other speaker resolves to no audio at
+    all and flashes past as a silent subtitle. Borrowing one of their OWN lines means the .fuz is
+    already in the base game's voice archive under the right voice type, and it simply plays.
+
+    The two chosen are a matched pair out of CWSharedInfos, which exists for exactly this purpose:
+
+        Ulfric  000E6D9B  "Get down there and join Galmar on the front line."
+        Tullius 000E6D72  "Get down there and join Rikke on the front line."
+
+    Both were confirmed present in Skyrim - Voices_en0.bsa under maleuniqueulfric and
+    maleuniquetullius. They read as the order that follows handing the harness over, and they name
+    the right second-in-command for each side without a word being written."""
     body = sub(b"VMAD", vmad_scripts([("ACWFBE_TIF", [])]) +
                info_fragment("ACWFBE_TIF", "ACWFBE_TIF", fragment))
     body += sub(b"ENAM", struct.pack("<HH", 0, 0))
     body += sub(b"PNAM", struct.pack("<I", previous))
     body += sub(b"CNAM", b"\x00")
+    body += sub(b"DNAM", struct.pack("<I", shared_response))
     body += ctda(FUNC_GET_IS_ID, speaker, comparison=1.0)
     body += ctda(FUNC_GET_STAGE, quest, comparison=float(STAGE_OFFERED))
-    body += sub(b"TRDT", trdt())
-    body += z_sub(b"NAM1", response)
-    body += sub(b"NAM2", b"\x00")
-    body += sub(b"NAM3", b"\x00")
     body += z_sub(b"RNAM", player_line)
     return record(b"INFO", form, body)
