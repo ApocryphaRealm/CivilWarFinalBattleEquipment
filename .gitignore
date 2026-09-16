@@ -1,0 +1,8 @@
+# Nobody else's files are redistributed through this repository. The plugin, the meshes and the
+# textures are all generated at build time from mods that must already be installed - so a
+# checkout plus those mods reproduces the package, and a checkout on its own carries nothing that
+# is not ours. See NOTICE.md for whose is whose.
+dist/Meshes/
+dist/Textures/
+dist/Scripts/*.pex
+dist/*.esp
