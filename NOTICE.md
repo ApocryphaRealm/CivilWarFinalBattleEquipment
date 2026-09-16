@@ -28,13 +28,29 @@ The meshes and textures are **not** Bethesda's. The creation's own art was never
 either; what ships here is NordwarUA's, because Civil War Champions - My Version replaced the
 creation's models with his and that replacement is what was taken.
 
-**What this means.** For the owner's own load order this is a rebuild of content he cannot otherwise
-use, from mods he already has installed. For a public release it is a different question, and not a
-small one: Nexus does not permit redistributing Creation Club content, and although no Creation Club
-*file* is redistributed here, the records are unmistakably derived from that creation's design. **Do
-not publish this without deciding that question deliberately.** The honest options are to keep it
-private, or to rename and re-stat the sets so that what ships is NordwarUA's armour with our own
-numbers and no Creation Club lineage at all.
+**What this means - stated carefully, because the first draft of this paragraph got it wrong.**
+
+Nexus hosts Creation Club-dependent mods without difficulty. The three mods this was built from are
+all on Nexus and all three master the creation; patches, rebalances and replacers for paid creations
+are ordinary there. What Nexus prohibits is redistributing Bethesda's paid FILES, and those three
+stay clear of it: Redone and Reduced Cut ship a plugin and nothing else, My Version ships its own
+replacement meshes, and not one of them does anything unless the creation is already installed. They
+need you to own it.
+
+This mod does not. It ships no Bethesda file - the meshes are NordwarUA's, the plugin is generated,
+there is no Creation Club master - but it reconstructs a paid creation's two armour sets, with their
+names, their statistics and their enchantment layout, for somebody who never bought it. **That is a
+paywall question, not an asset-redistribution one**, and it is the thing to weigh before publishing.
+
+How Nexus moderation actually treats a standalone recreation of that kind was NOT established.
+Their permissions and content-policy pages return HTTP 403 to anything that is not a browser, so
+nobody here has read them; the paragraph above reasons from what the three neighbouring mods do, not
+from the rules themselves. **Somebody should read the policy before this is published.**
+
+For the owner's own load order none of this arises - it is a rebuild of content he already owns the
+mods for and cannot otherwise load. If it is to be published, the clean route is to rename and
+re-stat the sets so what ships is NordwarUA's armour under our own names and numbers, with no
+Creation Club lineage at all.
 
 ---
 

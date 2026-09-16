@@ -37,6 +37,9 @@ a forge recipe. Nothing of anyone else's is stored in this repository - see `.gi
   What that cannot prove is whether the quest actually fires, whether Ulfric offers the line, and
   whether the armour renders.
 * **The publishing question in `NOTICE.md` section 1.** Unresolved, and it is the blocking one.
+  It is a paywall question - this mod reconstructs a paid creation's sets for somebody who does
+  not own it - and NOT the asset-redistribution question an earlier draft claimed. Nexus's own
+  policy pages have never been read from here (403), so the rules themselves are still unchecked.
 * **One Imperial set entry could not be rebuilt** - Creation Club form `02000D62`, which none of the
   three mods override, so nothing on this machine knows what it is. The Imperial set ships seven
   pieces instead of eight; the Stormcloak set is complete.
