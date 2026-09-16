@@ -44,7 +44,7 @@ work fed into it stays in the Credit section, where it belongs, and in the secti
 
 ---
 
-## 2. Civil War Champions - My Version — [Nexus 78892](https://www.nexusmods.com/skyrimspecialedition/mods/78892)
+## 2. Civil War Champions - My Version (page now titled "The Armor They Deserved"), by NordWarUA and DraugrOfRagnarok — [Nexus 78892](https://www.nexusmods.com/skyrimspecialedition/mods/78892)
 
 Source of the armour: 12 ARMO, 18 ARMA, 3 WEAP, 3 STAT, 2 LVLI, the tempering recipes, and **all 76
 meshes and 44 textures** in this package.
@@ -54,9 +54,11 @@ redistribution of them, not original art. The owner's standing position on Nordw
 2026-09-16 while the Jarl Ulfric Armor Replacer was being built, is *"because this is Nordwar UA, all
 assets are free use"*.
 
-**Mod 78892's own permissions block has not been read.** Nexus returns HTTP 403 to anything that is
-not a browser, so it could not be checked from here. Somebody should open that page before this is
-published, and record here what it says.
+**Permissions, settled 2026-09-16.** The owner ruled on what these mods' permissions require of us:
+*"for any of the permissions on this mod and the last few equipment related mods just add links back to
+the original mods and the credit section of each mod"*. The Credit section of the Nexus page names this
+mod and links to its page. The permissions BLOCK itself still cannot be read from this machine - Nexus
+returns 403 to anything that is not a browser - and by his decision that is no longer a gate on release.
 
 ## 3. Civil War Champions Redone — [Nexus 94352](https://www.nexusmods.com/skyrimspecialedition/mods/94352)
 
@@ -65,7 +67,11 @@ the ARMO records are built on. Its author rebalanced the creation's enchantments
 and gave each one its own name, which is the thing the owner singled out as worth keeping:
 *"i like how the enchantments have unique names in the magic affects menu"*.
 
-**Permissions not read** - same 403.
+**Permissions, settled 2026-09-16.** The owner ruled on what these mods' permissions require of us:
+*"for any of the permissions on this mod and the last few equipment related mods just add links back to
+the original mods and the credit section of each mod"*. The Credit section of the Nexus page names this
+mod and links to its page. The permissions BLOCK itself still cannot be read from this machine - Nexus
+returns 403 to anything that is not a browser - and by his decision that is no longer a gate on release.
 
 ## 4. Civil War Champions - Reduced Cut — [Nexus 94999](https://www.nexusmods.com/skyrimspecialedition/mods/94999), by Kamikaze
 
@@ -98,7 +104,11 @@ Seven of the nine are plain Peak Value Modifier effects on stock actor values wi
 script behind them, so the clone is exact. The two weapon debuffs are cloned with Thaumaturgy's own
 art, shader and projectile references dropped, since those cannot travel.
 
-**Permissions not read.**
+**Permissions, settled 2026-09-16.** The owner ruled on what these mods' permissions require of us:
+*"for any of the permissions on this mod and the last few equipment related mods just add links back to
+the original mods and the credit section of each mod"*. The Credit section of the Nexus page names this
+mod and links to its page. The permissions BLOCK itself still cannot be read from this machine - Nexus
+returns 403 to anything that is not a browser - and by his decision that is no longer a gate on release.
 
 ---
 
