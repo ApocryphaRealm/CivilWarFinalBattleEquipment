@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Author "Civil War Final Battle Equipment.esl" from the three Civil War Champions mods already installed.
+r"""Author "Civil War Final Battle Equipment.esp" from the three Civil War Champions mods already installed.
 
 WHY THIS EXISTS AT ALL
     The owner has three mods sitting at the top of Njordlinger - Civil War Champions - My Version
@@ -767,5 +767,5 @@ def report_unresolved(src, rm):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    default = os.path.normpath(os.path.join(here, "..", "dist", "Civil War Final Battle Equipment.esl"))
+    default = os.path.normpath(os.path.join(here, "..", "dist", "Civil War Final Battle Equipment.esp"))
     main(sys.argv[1] if len(sys.argv) > 1 else default)

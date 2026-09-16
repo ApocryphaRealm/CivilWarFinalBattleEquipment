@@ -10,7 +10,14 @@
   the files is the whole change. No plugin edit, no version-dependent behaviour.
 * Without them, a player running those mods saw the generic shield and scabbard against the Dragon
   Blood set.
-* No other file changed, so a 1.0.0 install updates in place.
+* **The plugin is renamed from `.esl` to `.esp`.** It keeps the light flag, so it still costs no
+  full load-order slot, but the game forces every `.esl` FILE to load in the master block at the
+  very top of the order where nothing can sort below it. As a `.esp` carrying the light flag - an
+  ESPFE - it sorts among the ordinary plugins and can be placed relative to them.
+* **That rename breaks saves made with 1.0.0.** A save records a plugin by file name, so anything
+  from this mod that a 1.0.0 character was carrying or had progressed will be gone. Start the quest
+  fresh, or stay on 1.0.0.
+* No mesh, texture or record changed otherwise.
 
 ## 1.0.0 - 2026-09-16
 
