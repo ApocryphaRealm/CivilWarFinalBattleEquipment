@@ -128,5 +128,5 @@ def main(esp, dest):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    main(os.path.normpath(os.path.join(here, "..", "dist", "Civil War Final Battle Equipment.esp")),
+    main(os.path.normpath(os.path.join(here, "..", "dist", "Civil War Final Battle Equipment.esl")),
          os.path.normpath(os.path.join(here, "..", "dist")))

@@ -209,11 +209,31 @@ def group(label, payload, group_type=0):
             struct.pack("<I", group_type) + struct.pack("<I", 0) + struct.pack("<I", 0) + payload)
 
 
-def tes4(masters, record_count, next_object_id, author, description):
+ESL_FLAG = 0x00000200
+ESL_FIRST_ID = 0x000800
+ESL_LAST_ID = 0x000FFF
+
+
+def tes4(masters, record_count, next_object_id, author, description, esl=True):
+    """The plugin header. LIGHT by default.
+
+    Skyrim allows 254 full plugins and 4,096 light ones, and Njordlinger alone already runs about
+    148 full. A mod of ours that adds a hundred records has no business spending one of the scarce
+    slots. The owner, 2026-09-16: "we need to make sure to ship any of our mods that have a plugin
+    as an esl not an esp", and then "which goes for past mods as well".
+
+    A light plugin's new records must all sit between 0x000800 and 0x000FFF. The check below is not
+    decoration: an over-full plugin flagged light silently loses the records past the end of the
+    range, which looks exactly like a mod that installed correctly and does nothing."""
+    if esl and not (ESL_FIRST_ID <= next_object_id <= ESL_LAST_ID + 1):
+        raise SystemExit(
+            "cannot ship light: next object id 0x%06X falls outside 0x%03X-0x%03X, so this plugin "
+            "holds more than %d new records" %
+            (next_object_id, ESL_FIRST_ID, ESL_LAST_ID, ESL_LAST_ID - ESL_FIRST_ID + 1))
     body = sub(b"HEDR", struct.pack("<fiI", 1.7, record_count, next_object_id))
     body += sub(b"CNAM", author.encode("cp1252") + b"\x00")
     body += sub(b"SNAM", description.encode("cp1252") + b"\x00")
     for m in masters:
         body += sub(b"MAST", m.encode("cp1252") + b"\x00")
         body += sub(b"DATA", struct.pack("<Q", 0))
-    return record(b"TES4", 0, body)
+    return record(b"TES4", 0, body, flags=ESL_FLAG if esl else 0)

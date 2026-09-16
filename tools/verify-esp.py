@@ -165,5 +165,5 @@ def main(path):
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    default = os.path.normpath(os.path.join(here, "..", "dist", "Civil War Final Battle Equipment.esp"))
+    default = os.path.normpath(os.path.join(here, "..", "dist", "Civil War Final Battle Equipment.esl"))
     raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else default))
