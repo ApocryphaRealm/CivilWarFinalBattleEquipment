@@ -30,6 +30,20 @@ a forge recipe. Nothing of anyone else's is stored in this repository - see `.gi
     76 meshes, 44 textures, 96 MB
     3 Papyrus scripts, compiled against the vanilla sources
 
+## Rule 3 acknowledged, not met - no public GitHub repository yet (2026-09-16)
+
+`pre-finalize-check.ps1` fails this mod on rule 3, "Every mod gets a public GitHub repository", and
+it is right to. The repository exists locally with full history and a `v1.0.0` tag, but it has no
+`origin`: creating a public repo was refused by a permission prompt in the session that built it,
+and that is the owner's to grant, not something to work around.
+
+Recorded here rather than silently overridden, which is what the gate asks for. Everything else
+passes - 11 checks, including the finalize gate, the ledger evidence, the plugin hash, the
+compatibility verdict and installation in both instances.
+
+**To clear it:** allow the repo creation and push, then re-run the check. Nothing about the package
+changes; this is about where the source lives.
+
 ## Open items
 
 * **First in-game run, 2026-09-16 - the plugin loads and two bugs were found and fixed.**
