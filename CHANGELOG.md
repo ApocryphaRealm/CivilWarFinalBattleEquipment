@@ -1,5 +1,17 @@
 # Civil War Final Battle Equipment - changelog
 
+## 1.0.1
+
+* Adds the four Dragon Blood meshes NordwarUA ships that this package was missing:
+  `DragonShieldOnBack`, `DragonShieldOnBackClk`, `DragonSwordLeft` and `DragonSwordSheath`.
+  They are the shield as it hangs on the back and the sword sheathed or held in the off hand.
+* Nothing references them by record - not this mod's plugin, and not NordwarUA's own. Simple Dual
+  Sheath, Immersive Equipment Displays and the like find them by file name, which is why shipping
+  the files is the whole change. No plugin edit, no version-dependent behaviour.
+* Without them, a player running those mods saw the generic shield and scabbard against the Dragon
+  Blood set.
+* No other file changed, so a 1.0.0 install updates in place.
+
 ## 1.0.0 - 2026-09-16
 
 First build. Two sets of Civil War war gear, issued before the final battle.

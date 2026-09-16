@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   Mod metadata, read by Mod Organizer and Vortex when the package is installed.
 
@@ -11,7 +11,7 @@
 <fomod>
   <Name>Civil War Final Battle Equipment</Name>
   <Author>ApocryphaRealm</Author>
-  <Version>1.0.0</Version>
+  <Version>1.0.1</Version>
   <Description>
     Two sets of war gear for the end of the Civil War - Ice Veins for the Stormcloaks, Dragon Blood
     for the Legion - issued by Ulfric Stormcloak or General Tullius in his own hall before the last
