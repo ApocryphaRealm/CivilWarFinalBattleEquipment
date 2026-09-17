@@ -1,5 +1,11 @@
 # Civil War Final Battle Equipment - changelog
 
+## 1.0.2 - 2026-09-16 - untested
+
+### Changed
+- **Dragon Blood is re-arted from General Tullius's own armour in Heavy Legion SSE** (Nexus 22877; the owner, 2026-09-16: *"were only taking tullius armor from heavy legion and using it for dragon blood armor, nothing else from heavy legion"*). The cuirass, gauntlets, boots and helmet now wear the muscled cuirass, studded skirt and horned helm the general himself wears - 31 meshes and 12 textures, written under Dragon Blood's existing file names by `tools/reart-dragonblood.py`, so not one record in the plugin changed and no save is disturbed. The shield, sword and cloak keep their art; Tullius's set has none.
+- **The plugin is an ESPFE** - `Civil War Final Battle Equipment.esp` carrying the light flag - so it sorts among ordinary plugins.
+
 ## 1.0.1
 
 * Adds the four Dragon Blood meshes NordwarUA ships that this package was missing:
