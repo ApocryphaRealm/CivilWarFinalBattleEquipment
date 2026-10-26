@@ -6,3 +6,6 @@ dist/Meshes/
 dist/Textures/
 dist/Scripts/*.pex
 dist/*.esp
+
+# Parked, unreleased and untested work (see wip-unreleased/README.md) - kept out of dist and out of git
+wip-unreleased/
