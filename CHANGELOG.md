@@ -1,5 +1,10 @@
 # Civil War Final Battle Equipment - changelog
 
+## 1.0.3 - 2026-10-26 - untested
+
+### Fixed
+- Rebuilt the compiled scripts so their headers no longer carry the build machine's account and computer name (the Papyrus compiler writes both into every .pex). The script code is byte-for-byte the same as 1.0.2's; no gameplay change.
+
 ## 1.0.2 - 2026-09-16 - untested
 
 ### Changed
